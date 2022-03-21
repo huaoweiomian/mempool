@@ -1,18 +1,18 @@
 #include <memory.h>
 #include "mempool.h"
 /************************************************************************/
-/* 内存池起始地址对齐到ADDR_ALIGN字节
+/* 内存池起始地址对齐到ADDR_ALIGN字节*/
 /************************************************************************/
 size_t check_align_addr(void*& pBuf)
 {
     size_t align = 0;
-    size_t addr = (int)pBuf;
+    size_t addr = (size_t)pBuf;
     align = (ADDR_ALIGN - addr % ADDR_ALIGN) % ADDR_ALIGN;
     pBuf = (char*)pBuf + align;
     return align;
 }
 /************************************************************************/
-/* 内存block大小对齐到MINUNITSIZE字节
+/* 内存block大小对齐到MINUNITSIZE字节*/
 /************************************************************************/
 size_t check_align_block(size_t size)
 {
@@ -21,7 +21,7 @@ size_t check_align_block(size_t size)
     return size - align;
 }
 /************************************************************************/
-/* 分配内存大小对齐到SIZE_ALIGN字节
+/* 分配内存大小对齐到SIZE_ALIGN字节*/
 /************************************************************************/
 size_t check_align_size(size_t size)
 {
@@ -29,7 +29,7 @@ size_t check_align_size(size_t size)
     return size;
 }
 /************************************************************************/
-/* 以下是链表相关操作
+/* 以下是链表相关操作*/
 /************************************************************************/
 memory_chunk* create_list(memory_chunk* pool, size_t count)
 {
@@ -123,7 +123,7 @@ void delete_chunk(memory_chunk*& head, memory_chunk* element)
     element->next = NULL;
 }
 /************************************************************************/
-/* 内存映射表中的索引转化为内存起始地址
+/* 内存映射表中的索引转化为内存起始地址*/
 /************************************************************************/
 void* index2addr(PMEMORYPOOL mem_pool, size_t index)
 {
@@ -133,7 +133,7 @@ void* index2addr(PMEMORYPOOL mem_pool, size_t index)
     return ret;
 }
 /************************************************************************/
-/* 内存起始地址转化为内存映射表中的索引
+/* 内存起始地址转化为内存映射表中的索引*/
 /************************************************************************/
 size_t addr2index(PMEMORYPOOL mem_pool, void* addr)
 {
@@ -146,7 +146,7 @@ size_t addr2index(PMEMORYPOOL mem_pool, void* addr)
 /* 生成内存池
 * pBuf: 给定的内存buffer起始地址
 * sBufSize: 给定的内存buffer大小
-* 返回生成的内存池指针
+* 返回生成的内存池指针*/
 /************************************************************************/
 PMEMORYPOOL CreateMemoryPool(void* pBuf, size_t sBufSize)
 {
@@ -157,10 +157,13 @@ PMEMORYPOOL CreateMemoryPool(void* pBuf, size_t sBufSize)
     mem_pool->mem_map_pool_count = (sBufSize - mem_pool_struct_size + MINUNITSIZE - 1) / MINUNITSIZE;
     mem_pool->mem_map_unit_count = (sBufSize - mem_pool_struct_size + MINUNITSIZE - 1) / MINUNITSIZE;
     mem_pool->pmem_map = (memory_block*)((char*)pBuf + mem_pool_struct_size);
-    mem_pool->pfree_mem_chunk_pool = (memory_chunk*)((char*)pBuf + mem_pool_struct_size + sizeof(memory_block) * mem_pool->mem_map_unit_count);
+    mem_pool->pfree_mem_chunk_pool = (memory_chunk*)((char*)pBuf + mem_pool_struct_size + \
+                                                     sizeof(memory_block) * mem_pool->mem_map_unit_count);
 
-    mem_pool->memory = (char*)pBuf + mem_pool_struct_size+ sizeof(memory_block) * mem_pool->mem_map_unit_count + sizeof(memory_chunk) * mem_pool->mem_map_pool_count;
-    mem_pool->size = sBufSize - mem_pool_struct_size - sizeof(memory_block) * mem_pool->mem_map_unit_count - sizeof(memory_chunk) * mem_pool->mem_map_pool_count;
+    mem_pool->memory = (char*)pBuf + mem_pool_struct_size+ sizeof(memory_block) * mem_pool->mem_map_unit_count + \
+            sizeof(memory_chunk) * mem_pool->mem_map_pool_count;
+    mem_pool->size = sBufSize - mem_pool_struct_size - sizeof(memory_block) * mem_pool->mem_map_unit_count - \
+            sizeof(memory_chunk) * mem_pool->mem_map_pool_count;
     size_t align = check_align_addr(mem_pool->memory);
     mem_pool->size -= align;
     mem_pool->size = check_align_block(mem_pool->size);
@@ -186,7 +189,7 @@ PMEMORYPOOL CreateMemoryPool(void* pBuf, size_t sBufSize)
     return mem_pool;
 }
 /************************************************************************/
-/* 暂时没用
+/* 暂时没用*/
 /************************************************************************/
 void ReleaseMemoryPool(PMEMORYPOOL* ppMem)
 {
@@ -195,7 +198,7 @@ void ReleaseMemoryPool(PMEMORYPOOL* ppMem)
 /* 从内存池中分配指定大小的内存
 * pMem: 内存池 指针
 * sMemorySize: 要分配的内存大小
-* 成功时返回分配的内存起始地址，失败返回NULL
+* 成功时返回分配的内存起始地址，失败返回NULL*/
 /************************************************************************/
 void* GetMemory(size_t sMemorySize, PMEMORYPOOL pMem)
 {
@@ -251,6 +254,7 @@ void* GetMemory(size_t sMemorySize, PMEMORYPOOL pMem)
         tmp->pfree_mem_addr = &(pMem->pmem_map[current_index+current_block->count]);
 
         size_t end_index = current_index + copy.count - 1;
+        //更新最后一个数组
         pMem->pmem_map[end_index].start = current_index + current_block->count;
         return index2addr(pMem, current_index);
     }
@@ -258,7 +262,7 @@ void* GetMemory(size_t sMemorySize, PMEMORYPOOL pMem)
 /************************************************************************/
 /* 从内存池中释放申请到的内存
 * pMem：内存池指针
-* ptrMemoryBlock：申请到的内存起始地址
+* ptrMemoryBlock：申请到的内存起始地址*/
 /************************************************************************/
 void FreeMemory(void *ptrMemoryBlock, PMEMORYPOOL pMem)
 {
