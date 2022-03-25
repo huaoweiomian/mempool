@@ -17,7 +17,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mempool.cpp \
-        simple_mempool.cpp
+        simple_mempool/simple_mempool.cpp \
+        util/list.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -26,4 +27,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     mempool.h \
-    simple_mempool.h
+    simple_mempool/simple_mempool.h \
+    util/list.h
