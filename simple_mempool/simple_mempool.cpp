@@ -37,6 +37,28 @@ void SIMPLE_MEMPOOL::sdealloc(void *buff)
     tmp->free_f(buff);
 }
 
+void SIMPLE_MEMPOOL::clean_without_used()
+{
+    MCHUNK *tmp = head;
+    MCHUNK *pre = NULL;
+    while(tmp != NULL){
+        if(tmp->hasused()){
+            pre = tmp;
+            tmp = tmp->next;
+            continue;
+        }
+        if(tmp == head){
+            head = head->next;
+            delete tmp;
+            tmp = head;
+            continue;
+        }
+        pre->next = tmp->next;
+        delete tmp;
+        tmp = pre->next;
+    }
+}
+
 bool ITEM::new_buff(int argsize, bool argneed_release)
 {
     need_release = argneed_release;
@@ -82,6 +104,19 @@ bool SIMPLE_MEMPOOL::add_chunk()
     return true;
 }
 
+void SIMPLE_MEMPOOL::destroy()
+{
+    MCHUNK* tmp = NULL;
+    while(head != NULL){
+        tmp = head;
+        head = head->next;
+        delete tmp;
+    }
+    head = current = NULL;
+    mp.clear();
+    m_size = 0;
+}
+
 char *MCHUNK::buff_f()
 {
     MBLOCK* tmp = free;
@@ -99,6 +134,20 @@ bool MCHUNK::free_f(void *buff)
     tmp->next = free->next;
     free = tmp;
     return true;
+}
+
+MCHUNK::~MCHUNK()
+{
+    while(free!=NULL){
+        MBLOCK* tmp = free;
+        free = free->next;
+        delete tmp;
+    }
+    while(used!=NULL){
+        MBLOCK* tmp = used;
+        used = used->next;
+        delete tmp;
+    }
 }
 
 MBLOCK *MCHUNK::remove_from_used(char *buff)

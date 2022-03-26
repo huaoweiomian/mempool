@@ -36,28 +36,23 @@ typedef ITEM MBLOCK;
 struct MCHUNK{
     MCHUNK(){
         free = used = NULL;
-        next = head = current = NULL;
+        next = NULL;
     }
     bool init(int argsize, int num);
     MBLOCK bigbuff;
     MBLOCK* free;
     MBLOCK* used;
     MCHUNK* next;
-    MCHUNK* head;
-    MCHUNK* current;
 
     char *buff_f();
     bool free_f(void* buff);
     bool hasfree(){
-        if(current == NULL)
-            return false;
-        return current->free != NULL;
+        return free != NULL;
     }
     bool hasused(){
-        if(current == NULL)
-            return false;
-        return current->used != NULL;
+        return used != NULL;
     }
+    ~MCHUNK();
 private:
     MBLOCK* remove_from_used(char *buff);
 };
@@ -70,8 +65,8 @@ public:
     bool init();
     void* salloc();
     void sdealloc(void* buff);
-    void clean();
-    ~SIMPLE_MEMPOOL();
+    void clean_without_used();
+    ~SIMPLE_MEMPOOL(){destroy();}
 private:
     bool add_chunk();
     MCHUNK* head;
