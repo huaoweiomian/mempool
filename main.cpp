@@ -1,4 +1,3 @@
-#include <QCoreApplication>
 #include "mempool.h"
 #include <iostream>
 #include <vector>
@@ -11,10 +10,8 @@ void rand_test();
 void rand_test_2();
 int main(int argc, char *argv[])
 {
-    QCoreApplication a(argc, argv);
     rand_test();
     //  rand_test_2();
-    return a.exec();
 }
 
 
@@ -62,13 +59,10 @@ double test_mem_pool_perf_1(PMEMORYPOOL mem_pool, int iter, int* sizes)
 {
     cout << "*********************test_mem_pool_perf_1*********************" << endl;
     long litmp;
-    qlonglong QPart1, QPart2;
+    int64_t QPart1, QPart2;
     double t;
     double dfMinus, dfFreq;
-    QueryPerformanceFrequency(&litmp);
-    dfFreq = (double)litmp.QuadPart;// 获得计数器的时钟频率
-    QueryPerformanceCounter(&litmp);
-    QPart1 = litmp.QuadPart;// 获得初始值
+
     for (int i = 0; i < iter; i++)
     {
         void *p = GetMemory(sizes[i], mem_pool);
@@ -89,8 +83,7 @@ double test_mem_pool_perf_1(PMEMORYPOOL mem_pool, int iter, int* sizes)
         }
         FreeMemory(p,  mem_pool);
     }
-    QueryPerformanceCounter(&litmp);
-    QPart2 = litmp.QuadPart;//获得中止值
+
     dfMinus = (double)(QPart2-QPart1);
     t = dfMinus / dfFreq;// 获得对应的时间值，单位为秒
     cout << "test_mem_pool_perf_1: iter = " << iter << endl;
@@ -101,14 +94,10 @@ double test_mem_pool_perf_1(PMEMORYPOOL mem_pool, int iter, int* sizes)
 double test_std_perf_1(int iter, int* sizes)
 {
     cout << "*********************test_std_perf_1*********************" << endl;
-    LARGE_INTEGER litmp;
-    LONGLONG QPart1, QPart2;
+
     double t;
     double dfMinus, dfFreq;
-    QueryPerformanceFrequency(&litmp);
-    dfFreq = (double)litmp.QuadPart;// 获得计数器的时钟频率
-    QueryPerformanceCounter(&litmp);
-    QPart1 = litmp.QuadPart;// 获得初始值
+
     for (int i = 0; i < iter; i++)
     {
         void *p = malloc(sizes[i]);
@@ -119,9 +108,7 @@ double test_std_perf_1(int iter, int* sizes)
         }
         free(p);
     }
-    QueryPerformanceCounter(&litmp);
-    QPart2 = litmp.QuadPart;//获得中止值
-    dfMinus = (double)(QPart2-QPart1);
+
     t = dfMinus / dfFreq;// 获得对应的时间值，单位为秒
     cout << "test_std_perf_1: iter = " << iter << endl;
     cout << "time: " << t << endl;
@@ -132,14 +119,9 @@ double test_std_perf_1(int iter, int* sizes)
 double test_mem_pool_perf_2(PMEMORYPOOL mem_pool, int iter, int size)
 {
     cout << "*********************test_mem_pool_perf_2*********************" << endl;
-    LARGE_INTEGER litmp;
-    LONGLONG QPart1, QPart2;
     double t;
     double dfMinus, dfFreq;
-    QueryPerformanceFrequency(&litmp);
-    dfFreq = (double)litmp.QuadPart;// 获得计数器的时钟频率
-    QueryPerformanceCounter(&litmp);
-    QPart1 = litmp.QuadPart;// 获得初始值
+
     void **p = new void*[iter];
     if (p == NULL)
     {
@@ -202,9 +184,6 @@ double test_mem_pool_perf_2(PMEMORYPOOL mem_pool, int iter, int size)
         }
         FreeMemory(p[i],  mem_pool);
     }
-    QueryPerformanceCounter(&litmp);
-    QPart2 = litmp.QuadPart;//获得中止值
-    dfMinus = (double)(QPart2-QPart1);
     t = dfMinus / dfFreq;// 获得对应的时间值，单位为秒
     cout << "test_mem_pool_perf_2: iter = " << iter << endl;
     cout << "time: " << t << endl;
@@ -223,14 +202,8 @@ double test_mem_pool_perf_3(PMEMORYPOOL mem_pool, int iter, int size)
         cout << "new faild" << endl;
         return -1;
     }
-    LARGE_INTEGER litmp;
-    LONGLONG QPart1, QPart2, start, finish;
     double t;
     double dfMinus, dfFreq;
-    QueryPerformanceFrequency(&litmp);
-    dfFreq = (double)litmp.QuadPart;// 获得计数器的时钟频率
-    QueryPerformanceCounter(&litmp);
-    QPart1 = litmp.QuadPart;// 获得初始值
     for (int k = 0; k < iter / inner_iter; k++)
     {
         int j = 0;
@@ -258,9 +231,6 @@ double test_mem_pool_perf_3(PMEMORYPOOL mem_pool, int iter, int size)
                 FreeMemory(p[i],  mem_pool);
         }
     }
-    QueryPerformanceCounter(&litmp);
-    QPart2 = litmp.QuadPart;//获得中止值
-    dfMinus = (double)(QPart2-QPart1);
     t = dfMinus / dfFreq;// 获得对应的时间值，单位为秒
     cout << "test_mem_pool_perf_3: iter = " << iter << endl;
     cout << "time: " << t << endl;
@@ -277,14 +247,8 @@ double test_mem_pool_perf_rand(PMEMORYPOOL mem_pool, int iter, int* sizes, int* 
         cout << "new failed" << endl;
         return -1;
     }
-    LARGE_INTEGER litmp, gftime;
-    LONGLONG QPart1, QPart2, start, finish;
     double t, GetMemory_time, FreeMemory_time;
     double dfMinus, dfFreq;
-    QueryPerformanceFrequency(&litmp);
-    dfFreq = (double)litmp.QuadPart;// 获得计数器的时钟频率
-    QueryPerformanceCounter(&litmp);
-    QPart1 = litmp.QuadPart;// 获得初始值
     int index = 0;
     int size;
     int free_tmp = 0;
@@ -315,9 +279,6 @@ double test_mem_pool_perf_rand(PMEMORYPOOL mem_pool, int iter, int* sizes, int* 
             FreeMemory(p[--index],  mem_pool);
         }
     }
-    QueryPerformanceCounter(&litmp);
-    QPart2 = litmp.QuadPart;//获得中止值
-    dfMinus = (double)(QPart2-QPart1);
     t = dfMinus / dfFreq;// 获得对应的时间值，单位为秒
     cout << "test_mem_pool_perf_rand: iter = " << iter << endl;
     cout << "time: " << t << endl << endl;
@@ -334,14 +295,8 @@ double test_std_perf(int iter, int* sizes, int* instruction)
         return -1;
     }
 
-    LARGE_INTEGER litmp;
-    LONGLONG QPart1, QPart2;
     double t;
     double dfMinus, dfFreq;
-    QueryPerformanceFrequency(&litmp);
-    dfFreq = (double)litmp.QuadPart;// 获得计数器的时钟频率
-    QueryPerformanceCounter(&litmp);
-    QPart1 = litmp.QuadPart;// 获得初始值
 //  cout << "test start" << endl;
     int index = 0;
     int size;
@@ -359,9 +314,6 @@ double test_std_perf(int iter, int* sizes, int* instruction)
             free(p[--index]);
         }
     }
-    QueryPerformanceCounter(&litmp);
-    QPart2 = litmp.QuadPart;//获得中止值
-    dfMinus = (double)(QPart2-QPart1);
     t = dfMinus / dfFreq;// 获得对应的时间值，单位为秒
     cout << "test_std_perf: iter = " << iter << endl;
     cout << "time: " << t << endl << endl;
@@ -374,14 +326,8 @@ double test_std_perf(int iter, int* sizes, int* instruction)
 double test_std_perf_fix_size(int iter, int size)
 {
     cout << "******************* test_std_perf_fix_size *******************" << endl;
-    LARGE_INTEGER litmp;
-    LONGLONG QPart1, QPart2;
     double t;
     double dfMinus, dfFreq;
-    QueryPerformanceFrequency(&litmp);
-    dfFreq = (double)litmp.QuadPart;// 获得计数器的时钟频率
-    QueryPerformanceCounter(&litmp);
-    QPart1 = litmp.QuadPart;// 获得初始值
     int index = 0;
 
     for (int i = 0; i < iter; i++)
@@ -394,9 +340,6 @@ double test_std_perf_fix_size(int iter, int size)
         }
         free(p);
     }
-    QueryPerformanceCounter(&litmp);
-    QPart2 = litmp.QuadPart;//获得中止值
-    dfMinus = (double)(QPart2-QPart1);
     t = dfMinus / dfFreq;// 获得对应的时间值，单位为秒
     cout << "test_std_perf: iter = " << iter << endl;
     cout << "time: " << t << endl;
